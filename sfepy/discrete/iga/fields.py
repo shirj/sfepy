@@ -329,16 +329,33 @@ class IGField(Field):
     def setup_extra_data(self, geometry, info, is_trace):
         dct = info.dc_type.type
 
-        if dct != 'volume':
+        if geometry != None:
+            geometry_flag = 'surface' in geometry
+        else:
+            geometry_flag = False
+
+        if (dct == 'surface') or (geometry_flag):
+            reg = info.get_region()
+            from debug import debug; debug()
+            self._setup_surface_data(reg, is_trace)
+
+        elif dct not in ('volume',):
             raise ValueError('unknown dof connectivity type! (%s)' % dct)
 
     def create_mapping(self, ig, region, integral, integration):
         """
         Create a new reference mapping.
         """
-        vals, weights = integral.get_qp(self.domain.gel.name)
-        mapping = IGMapping(self.domain, region.cells)
-        cmap = mapping.get_mapping(vals, weights)
+        if integration == 'volume':
+            vals, weights = integral.get_qp(self.domain.gel.name)
+            mapping = IGMapping(self.domain, region.cells)
+            cmap = mapping.get_mapping(vals, weights)
+
+        elif (integration == 'surface') or (integration == 'surface_extra'):
+            pass
+
+        else:
+            raise ValueError('unknown integration type: %s' % integration)
 
         return cmap, mapping
 
@@ -370,7 +387,7 @@ class IGField(Field):
 
         key = key if key is not None else var_name
 
-        num = 25 if self.region.dim == 3 else 101
+        num = 25 if self.region.dim == 3 else 201
         pars = (nm.linspace(0, 1, num),) * self.region.dim
         mesh, out = create_mesh_and_output(self.domain.nurbs, pars,
                                            **{key : dofs})

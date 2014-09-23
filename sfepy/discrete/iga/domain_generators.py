@@ -78,6 +78,39 @@ def gen_patch_block_domain(dims, shape, centre, degrees, continuity=None,
     coors = x0 + ngrid.T * dd
     coors.shape = shape.tolist() + [dim]
 
+    ####
+    blow = 1.0
+    delta = 0.25 * dims[0]
+    power = 2.0
+
+    cc = coors.reshape((-1, dim))
+
+    dirs = (cc - centre[None, :])
+
+    radii = nm.abs(dirs).max(1)
+    ii = nm.abs(radii > 1e-12)
+    dirs[ii] = dirs[ii] / radii[ii][:, None]
+
+    dirs2 = (cc - centre[None, :])
+    radii2 = nm.sqrt((dirs2 * dirs2).sum(1))
+    ii = nm.abs(radii2 > 1e-12)
+    dirs2[ii] = dirs2[ii] / radii2[ii][:, None]
+
+    mod = lambda x: nm.where(x >= delta, delta + ((nm.maximum(x, delta) - delta) / (x.max() - delta))**power, x)
+
+    ## cc = cc + blow * mod[:, None] * dirs2
+
+    cc = centre[None, :] + (blow
+                            * (dirs2 * mod(radii)[:, None] * nm.sqrt(2)))
+
+    ## cc = centre[None, :] + ((dirs2 * radii[:, None] * nm.sqrt(2)))
+
+    ## fac = dims[0] / (cc[:, 0].max() - cc[:, 0].min())
+    ## cc *= fac
+
+    coors = cc.reshape(coors.shape)
+    ####
+
     block.array[..., :dim] = coors
 
     output('...done', verbose=verbose)
