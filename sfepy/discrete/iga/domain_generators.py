@@ -81,7 +81,7 @@ def gen_patch_block_domain(dims, shape, centre, degrees, continuity=None,
     ####
     blow = 1.0
     delta = 0.25 * dims[0]
-    power = 2.0
+    power = 3.0
 
     cc = coors.reshape((-1, dim))
 
@@ -96,12 +96,21 @@ def gen_patch_block_domain(dims, shape, centre, degrees, continuity=None,
     ii = nm.abs(radii2 > 1e-12)
     dirs2[ii] = dirs2[ii] / radii2[ii][:, None]
 
-    mod = lambda x: nm.where(x >= delta, delta + ((nm.maximum(x, delta) - delta) / (x.max() - delta))**power, x)
+    rmin = radii.min()
+    rmax = radii.max()
+    print delta, rmin, rmax
+
+    mod = lambda x: nm.where(x >= delta, ((x - delta) / (x.max() - delta))**power, 0.0)
+
+    print mod(rmin), mod(rmax)
+
+
+#    mod = lambda x: x
 
     ## cc = cc + blow * mod[:, None] * dirs2
 
-    cc = centre[None, :] + (blow
-                            * (dirs2 * mod(radii)[:, None] * nm.sqrt(2)))
+#    cc = centre[None, :] + (blow * (dirs2 * mod(radii)[:, None] * nm.sqrt(2)))
+    cc = cc + (blow * dims[0] * (dirs2 * mod(radii)[:, None] * nm.sqrt(2)))
 
     ## cc = centre[None, :] + ((dirs2 * radii[:, None] * nm.sqrt(2)))
 
