@@ -129,8 +129,9 @@ class Region(Struct):
     }
 
     __facet_kinds = {
-        2 : {'facet' : 'edge', 'facet_only' : 'edge_only'},
-        3 : {'facet' : 'face', 'facet_only' : 'face_only'},
+        1 : {'facet' : 'vertex', 'facet_only' : 'vertex_only'},
+        2 : {'facet' : 'edge',   'facet_only' : 'edge_only'},
+        3 : {'facet' : 'face',   'facet_only' : 'face_only'},
     }
 
     __op_to_fun = {
@@ -242,10 +243,17 @@ class Region(Struct):
         self.can_vertices = can[0]
         self.can_edges = can[1]
 
-        if self.tdim == 2:
+        if self.tdim == 1:
+            #
+            # LK
+            # self.can_vertices, self.can_edges ??
+            #
+            self.can = (can[0], can[3])
+            self.can_cells = can[1]
+            self.can_edges = False
+        elif self.tdim == 2:
             self.can = (can[0], can[1], can[3])
             self.can_cells = can[2]
-
         else:
             self.can = can
             self.can_faces = can[2]

@@ -34,8 +34,10 @@ class FEDomain(Domain):
         self.geom_els = geom_els = {}
         for ig, desc in enumerate(mesh.descs):
             gel = GeometryElement(desc)
-            # Create geometry elements of dimension - 1.
-            gel.create_surface_facet()
+
+            if gel.dim > 1:
+                # Create geometry elements of dimension - 1.
+                gel.create_surface_facet()
 
             geom_els[desc] = gel
 
@@ -61,7 +63,13 @@ class FEDomain(Domain):
                             n_gr=len(self.mesh.conns))
 
         self.setup_groups()
-        self.fix_element_orientation()
+
+        if dim > 1:
+            #
+            # LK - TBD?
+            #
+            self.fix_element_orientation()
+
         self.reset_regions()
         self.clear_surface_groups()
 

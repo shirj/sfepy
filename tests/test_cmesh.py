@@ -8,11 +8,11 @@ from sfepy import data_dir
 # n_vertex, n_edge, n_face, n_cell
 # d1 -> d2 : num, n_incident
 expected = {
-    '1_5_2.mesh' : ([5, 4, 0, 0], {
-        (0, 0) : (5, 8),
-        (0, 1) : (5, 8),
-        (1, 0) : (4, 8),
-        (1, 1) : (4, 6),
+    '1_3_2.mesh' : ([3, 2, 0, 0], {
+        (0, 0) : (3, 4),
+        (0, 1) : (3, 4),
+        (1, 0) : (2, 4),
+        (1, 1) : (2, 2),
         }),
     '2_3_2.mesh' : ([4, 5, 2, 0], {
         (0, 0) : (4, 10),
@@ -90,7 +90,7 @@ class Test(TestCommon):
     @staticmethod
     def from_conf(conf, options):
         filename_meshes = [data_dir + '/meshes/elements/%s_2.mesh' % geom
-                           for geom in ['1_5', '2_3', '2_4', '3_4', '3_8']]
+                           for geom in ['1_3', '2_3', '2_4', '3_4', '3_8']]
         filename_meshes.append(data_dir
                                + '/meshes/2d/special/square_triquad.mesh')
 
