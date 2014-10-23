@@ -63,13 +63,7 @@ class FEDomain(Domain):
                             n_gr=len(self.mesh.conns))
 
         self.setup_groups()
-
-        if dim > 1:
-            #
-            # LK - TBD?
-            #
-            self.fix_element_orientation()
-
+        self.fix_element_orientation()
         self.reset_regions()
         self.clear_surface_groups()
 
@@ -172,29 +166,35 @@ class FEDomain(Domain):
 
             ori, conn = group.gel.orientation, group.conn
 
-            itry = 0
-            while itry < 2:
-                flag = -nm.ones(conn.shape[0], dtype=nm.int32)
+            if ori is not None:
+                itry = 0
+                while itry < 2:
+                    flag = -nm.ones(conn.shape[0], dtype=nm.int32)
 
-                # Changes orientation if it is wrong according to swap*!
-                # Changes are indicated by positive flag.
-                orient_elements(flag, conn, coors,
-                                ori.roots, ori.vecs,
-                                ori.swap_from, ori.swap_to)
+                    # Changes orientation if it is wrong according to swap*!
+                    # Changes are indicated by positive flag.
+                    orient_elements(flag, conn, coors,
+                                    ori.roots, ori.vecs,
+                                    ori.swap_from, ori.swap_to)
 
-                if nm.alltrue(flag == 0):
-                    if itry > 0: output('...corrected')
-                    itry = -1
-                    break
+                    if nm.alltrue(flag == 0):
+                        if itry > 0: output('...corrected')
+                        itry = -1
+                        break
 
-                output('warning: bad element orientation, trying to correct...')
-                itry += 1
+                    output('warning: bad element orientation, trying to correct...')
+                    itry += 1
 
-            if itry == 2 and flag[0] != -1:
-                raise RuntimeError('elements cannot be oriented! (%d, %s)'
-                                   % (ii, self.mesh.descs[ii]))
-            elif flag[0] == -1:
-                output('warning: element orienation not checked')
+                if itry == 2 and flag[0] != -1:
+                    raise RuntimeError('elements cannot be oriented! (%d, %s)'
+                                       % (ii, self.mesh.descs[ii]))
+                elif flag[0] == -1:
+                    output('warning: element orienation not checked')
+            else:
+                #
+                # TBD: 1D element
+                #
+                pass
 
     def get_element_diameters(self, ig, cells, vg, mode, square=True):
         group = self.groups[ig]
