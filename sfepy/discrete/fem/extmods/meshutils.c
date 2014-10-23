@@ -90,26 +90,6 @@ int32 orient_elements( int32 *flag, int32 flag_n_row,
       }
     }
   }
-  else if (nc == 1) {
-      // 1D
-      for (iel = 0; iel < conn_n_row; iel++) {
-          flag[iel] = 0;
-
-          for (ir = 0; ir < v_roots_n_row; ir++) {
-              ip0 = IR(iel, ir);
-              ip1 = IV(iel, ir, 0);
-
-              for (ii = 0; ii < 1; ii++){
-                  v0[ii] = coors[nc*ip0 + ii];
-                  v1[ii] = coors[nc*ip1 + ii] - v0[ii];
-              }
-              v1[1] = v2[1] = 0.0;
-              v1[2] = v2[2] = 0.0;
-              gtr_cross_product(cross, v1, v2);
-              output("%d %d -> %d %d %e\n", iel, ir, ip0, ip1, dot[0]);
-          }
-      }
-  }
   
   return( RET_OK );
 
