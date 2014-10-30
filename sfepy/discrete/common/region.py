@@ -241,21 +241,19 @@ class Region(Struct):
         can = [bool(ii) for ii in self.__can[self.true_kind]]
 
         self.can_vertices = can[0]
-        self.can_edges = can[1]
-
+        
         if self.tdim == 1:
-            #
-            # LK
-            # self.can_vertices, self.can_edges ??
-            #
             self.can = (can[0], can[3])
-            self.can_cells = can[1]
             self.can_edges = False
+            self.can_faces = False
+            self.can_cells = can[1]
         elif self.tdim == 2:
             self.can = (can[0], can[1], can[3])
+            self.can_edges = can[1]
             self.can_cells = can[2]
         else:
             self.can = can
+            self.can_edges = can[1]
             self.can_faces = can[2]
             self.can_cells = can[3]
 
@@ -318,8 +316,8 @@ class Region(Struct):
 
     @property
     def faces(self):
-        if self.tdim == 2:
-            raise AttributeError('2D region has no faces!')
+        if self.tdim <= 2:
+            raise AttributeError('1D or 2D region has no faces!')
 
         if self.entities[2] is None:
             if 'face' in self.true_kind:
@@ -343,17 +341,19 @@ class Region(Struct):
     def facets(self):
         if self.tdim == 3:
             return self.faces
-
-        else:
+        elif self.tdim == 2:
             return self.edges
+        else:
+            return self.vertices
 
     @facets.setter
     def facets(self, vals):
         if self.tdim == 3:
             self.faces = vals
-
-        else:
+        elif self.tdim == 2:
             self.edges = vals
+        else:
+            self.vertices = vals
 
     @property
     def cells(self):

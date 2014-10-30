@@ -33,6 +33,7 @@ int32 divgrad_build_gtg( FMField *out, FMField *gc )
 #endif
 
   fmf_fillC( out, 0.0 );
+
   switch (dim) {
   case 3:
     for (iqp = 0; iqp < nQP; iqp++) {
@@ -74,7 +75,21 @@ int32 divgrad_build_gtg( FMField *out, FMField *gc )
       }
     }
     break;
-    
+
+  case 1:
+      for (iqp = 0; iqp < nQP; iqp++){
+          pg1 = FMF_PtrLevel(gc, iqp);
+          pout1 = FMF_PtrLevel(out, iqp);
+
+          for (ir = 0; ir < nEP; ir++){
+              for (ic = 0; ic < nEP; ic++){
+                  pout1[ic] = pg1[ir] * pg1[ic];
+              }
+              pout1 += nCol;
+          }
+      }
+      break;
+
   default:
     errput( ErrHead "ERR_Switch\n" );
     return( RET_Fail );
@@ -172,6 +187,31 @@ int32 divgrad_act_g_m( FMField *out, FMField *gc, FMField *mtx )
     }
     break;
 
+  case 1:
+      for (iqp = 0; iqp < nQP; iqp++){
+          pg1 = FMF_PtrLevel(gc, iqp);
+          pout = FMF_PtrLevel(out, iqp);
+
+          if (mtx->nLev == nQP) {
+              pmtx = FMF_PtrLevel(mtx, iqp);
+          }
+          else {
+              pmtx = FMF_PtrCurrent(mtx);
+          }
+
+          for (ir = 0; ir < dim; ir++){
+              for (ic = 0; ic < nCol; ic++){
+                  val1 = 0.0;
+                  for (ik = 0; ik < nEP; ik++){
+                      val1 += pg1[ik] * pmtx[ic + nCol*ik];
+                  }
+                  pout[dim*nCol*ir + ic + 0] = val1;
+              }
+              pmtx += nCol * nEP;
+          }
+      }
+      break;
+
   default:
     errput( ErrHead "ERR_Switch\n" );
     return( RET_Fail );
@@ -255,6 +295,21 @@ int32 divgrad_act_gt_m( FMField *out, FMField *gc, FMField *mtx )
       }
     }
     break;
+
+  case 1:
+      for (iqp = 0; iqp < nQP; iqp++){
+          pg1 = FMF_PtrLevel(gc, iqp);
+          pmtx = FMF_PtrLevel(mtx, iqp);
+
+          for (iep = 0; iep < nEP; iep++){
+              pout1 = FMF_PtrLevel(out, iqp) + nCol * iep;
+              for (ii = 0; ii < nCol; ii++){
+                  pout1[ii] = pg1[iep] * pmtx[0 * nCol + ii];
+              }
+          }
+      }
+      break;
+
   default:
     errput( ErrHead "ERR_Switch\n" );
     return( RET_Fail );
@@ -401,6 +456,22 @@ int32 convect_build_vtbg( FMField *out, FMField *gc, FMField *fv )
       }
     }
     break;
+
+  case 1:
+      for (iqp = 0; iqp < nQP; iqp++){
+          pg1 = FMF_PtrLevel(gc, iqp);
+          pout1 = FMF_PtrLevel(out, iqp);
+          pfv = FMF_PtrLevel(fv, iqp);
+
+          for (ii = 0; ii < dim; ii++){
+              for (iep = 0; iep < nEP; iep++){
+                  pout1[iep] = pg1[iep] * pfv[ii];
+              }
+              pout1 += nEP;
+          }
+      }
+      break;
+
   default:
     errput( ErrHead "ERR_Switch\n" );
     return( RET_Fail );
@@ -469,6 +540,19 @@ int32 convect_build_vtg( FMField *out, FMField *gc, FMField *fv )
       }
     }
     break;
+
+  case 1:
+      for (iqp = 0; iqp < nQP; iqp++){
+          pg1 = FMF_PtrLevel(gc, iqp);
+          pout1 = FMF_PtrLevel(out, iqp);
+          pfv = FMF_PtrLevel(fv, iqp);
+
+          for (iep = 0; iep < nEP; iep++){
+              pout1[iep] = pg1[iep] * pfv[0];
+          }
+      }
+      break;
+
   default:
     errput( ErrHead "ERR_Switch\n" );
     return( RET_Fail );

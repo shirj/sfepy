@@ -41,16 +41,21 @@ int32 form_tlcc_strainGreen_VS( FMField *strain, FMField *mtxF )
   int32 *t2i = 0, *t2j = 0;
 
   switch (dim) {
+      // TBD-LK
+  case 1:
+      t2i = 0;
+      t2j = 0;
+      break;
   case 2:
-    t2i = t2i2D;
-    t2j = t2j2D;
-    break;
+      t2i = t2i2D;
+      t2j = t2j2D;
+      break;
   case 3:
-    t2i = t2i3D;
-    t2j = t2j3D;
-    break;
+      t2i = t2i3D;
+      t2j = t2j3D;
+      break;
   default:
-    errput( ErrHead "ERR_Switch\n" );
+      errput( ErrHead "ERR_Switch\n" );
   }
 
   for (iqp = 0; iqp < strain->nLev; iqp++) {
