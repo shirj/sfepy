@@ -175,6 +175,8 @@ equations = {
                                   v, u )
            + dw_tl_fib_a.i.Omega( f2.fmax, f2.eps_opt, f2.s, f2.fdir, f2.act,
                                   v, u )
+           + dw_tl_fib_a2.i.Omega( ts, f2.fmax, f2.eps_opt, f2.s, f2.fdir, f2.act, f2.act,
+                                  v, u )
            = 0""",
 }
 
