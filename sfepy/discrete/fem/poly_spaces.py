@@ -629,7 +629,7 @@ class LagrangeTensorProductPolySpace(LagrangePolySpace):
 
         else:
             c_min, c_max = self.bbox[:,0]
-            
+
             cr = nm.arange(2 * dim)
             node_coors = (nodes[:,cr[::2]] * c_min
                           + nodes[:,cr[1::2]] * c_max) / order
@@ -642,7 +642,7 @@ class LagrangeTensorProductPolySpace(LagrangePolySpace):
         dim = self.geometry.dim
 
         ev = self.ps1d.eval_base
-        
+
         if diff:
             base = nm.ones((coors.shape[0], dim, self.n_nod), dtype=nm.float64)
 
@@ -656,7 +656,7 @@ class LagrangeTensorProductPolySpace(LagrangePolySpace):
                                                 diff=True,
                                                 suppress_errors=suppress_errors,
                                                 eps=eps)
-                
+
                     else:
                         base[:,iv:iv+1,:] *= ev(coors[:,ii:ii+1].copy(),
                                                 diff=False,
@@ -669,7 +669,7 @@ class LagrangeTensorProductPolySpace(LagrangePolySpace):
             for ii in xrange(dim):
                 self.ps1d.nodes = self.nodes[:,2*ii:2*ii+2].copy()
                 self.ps1d.n_nod = self.n_nod
-                
+
                 base *= ev(coors[:,ii:ii+1].copy(),
                            diff=diff,
                            suppress_errors=suppress_errors,
@@ -874,3 +874,44 @@ class LobattoTensorProductPolySpace(PolySpace):
             base = ebase
 
         return base
+
+class RaviartThomas0PolySpace(PolySpace):
+    """
+    """
+    name = 'Raviart-Thomas_simplex'
+
+    oppposite_vertex = {2 : [2, 0, 1], 3: [3, 1, 2, 0]}
+
+    def __init__(self, name, geometry, order):
+        PolySpace.__init__(self, name, geometry, order)
+
+        assert_(order == 0)
+
+        gel = self.geometry
+
+        dim = gel.dim
+        assert_(dim in [2, 3])
+
+        self.n_nod = gel.n_edge if dim == 2 else gel.n_face
+        self.nodes = nm.arange(self.n_nod)[:, None]
+
+    def _eval_base(self, coors, diff=False, ori=None,
+                   suppress_errors=False, eps=1e-15):
+        """
+        See PolySpace.eval_base().
+
+        No edge length normalization!
+        """
+        gel = self.geometry
+
+        ov = self.oppposite_vertex[gel.dim]
+
+        if diff:
+            refbase = nm.zeros((coors.shape[0], self.n_nod, gel.dim, gel.dim),
+                               dtype=nm.float64)
+            refbase[..., :, :] = nm.eye(gel.dim, dtype=nm.float64)
+
+        else:
+            refbase = coors[:, None, :] - gel.coors[ov]
+
+        return refbase
